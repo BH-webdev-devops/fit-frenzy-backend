@@ -1,0 +1,94 @@
+Fitness Tracking website
+
+Frontend: Next.js for web
+Backend: Node.js with Express
+Database: Supabase(postgres)
+
+Database schema:
+- users
+    - id
+    - name
+    - email
+    - password
+    - created_at
+    - updated_at
+- profiles
+    - id
+    - user_id
+    - gender
+    - age
+    - weight
+    - height
+    - created_at
+    - updated_at
+- workout
+    - id
+    - user_id
+    - date
+    - duration
+    - type
+    - calories_burnt
+    - created_at
+    - updated_at
+-quotes
+    - id
+    - quote
+    - author
+
+
+Features:
+- sign up
+    - name
+    - email
+    - password
+- login
+    - email
+    - password
+- profile creation
+    - name
+    - age
+    - gender
+    - weight
+    - height
+- search exercises
+    - based on category/type
+    - keyword based
+- nutrition suggestion
+    - search food
+    
+
+app features by user:
+- home page: search exercises
+- workout logging:
+    date: duration: type:legs/back/cardio   burnt calories:(we do the calculation) 
+    - add
+    - edit 
+    - delete
+- progress tracking:
+    default show one week data
+    filter: last 1 week/1 month/ all
+    additional:
+        graphical representation
+    analysis: 
+        - you are doing great
+        - you are being lazy
+        - it's too much, take a break!
+
+Epics
+    - FrontEnd
+    - Backend
+    - Database
+    - Github Action: yaml
+    - Docker containerization
+    - Backend deployment on GCP
+    - Frontend deployment on GCP
+
+special feature:
+<!-- - recommend food diet 
+- recommend exercise based on most worked out log -->
+
+
+
+- pop up motivation quote each time user logins
+
+
