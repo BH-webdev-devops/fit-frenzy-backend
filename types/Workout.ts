@@ -1,7 +1,7 @@
 interface Workout {
     id: number;
     user_id: number;
-    title: string;
+    exercise: string;
     description: string;
     duration: number;
     date: Date;

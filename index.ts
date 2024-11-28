@@ -4,6 +4,7 @@ import cors from 'cors';
 import { pool } from './db/db';
 import authRouter from './routers/authRouter';
 import profileRouter from './routers/profileRouter';
+import workRouter from './routers/workoutRouter';
 
 let port = process.env.PORT || 3007;
 
@@ -19,6 +20,7 @@ app.get('/', (req: Request, res: Response): any => {
 
 app.use('/api', authRouter);
 app.use('/api', profileRouter);
+app.use('/api', workRouter);
 
 const startServer = async () => {
     try {
