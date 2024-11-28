@@ -9,14 +9,13 @@ import { getCurrentTimestamp } from '../utils/helpers';
 
 export const registerUser = async (req: Request, res: Response): Promise<Response | any> => {
     const { name, email, password } = req.body;
-    const image = '/public/images/' + req.file?.filename;
-    console.log(req.body, req.file);
+
     try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        await query('INSERT INTO users (name, email, password, profile_picture, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *', [name, email, hashedPassword, image, await getCurrentTimestamp()]);
+        await query('INSERT INTO users (name, email, password, created_at) VALUES ($1, $2, $3, $4) RETURNING *', [name, email, hashedPassword, getCurrentTimestamp().toISOString()]);
         console.log('User registered success');
-        return res.status(201).json({ message: 'User registered successfully', user: { name, email, profile_picture: image } });
+        return res.status(201).json({ message: 'User registered successfully', user: { name, email } });
     } catch (error) {
         console.error('Error registering user:', error);
         return res.status(500).json({ error: 'Error registering user' });
@@ -34,7 +33,7 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
         }
         const token = jwt.sign({ id: user.id }, String(process.env.JWT_SECRET), { expiresIn: '2h' })
         console.log(token)
-        return res.status(200).json({ message: 'Login successful', token: token, user: { id: user.id, name: user.name, email: user.email, profile_picture: user.profile_picture } })
+        return res.status(200).json({ message: 'Login successful', token: token, user: { id: user.id, name: user.name, email: user.email } })
     }
     catch (err) {
         console.log(err)

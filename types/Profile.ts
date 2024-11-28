@@ -8,5 +8,6 @@ interface Profile {
     height: number;
     location: string;
     birthdate: Date;
+    profile_picture: string;
 }
 export type { Profile }
