@@ -1,12 +1,18 @@
 import { Request, Response } from "express";
 import { query } from "../db/db";
 import { getCurrentTimestamp } from "../utils/helpers";
+import bcrypt from 'bcryptjs';
+
 
 export const addProfile = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { gender, age, weight, height, bio, location, birthday } = req.body;
+    let { gender, age, weight, height, bio, location, birthday } = req.body;
     const image = '/public/images/' + req.file?.filename;
-    console.log(req.body, req.file);
+    // Check if birthday is a valid date, otherwise set it to null
+    if (!birthday || isNaN(Date.parse(birthday))) {
+        birthday = null;
+    }
+    console.log('birthday', birthday)
     try {
         const user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
         const profile = await query(`INSERT INTO profiles (user_id, gender, age, weight, height, bio, location, birthday, created_at, profile_picture) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
@@ -19,7 +25,7 @@ export const addProfile = async (req: Request, res: Response): Promise<Response 
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
 
@@ -37,19 +43,65 @@ export const getProfile = async (req: Request, res: Response): Promise<Response 
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
 
-export const updateProfile = async (req: Request, res: Response): Promise<Response | any> => {
+export const updateUserDetails = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { gender, age, weight, height, bio, location, birthday, profile_picture } = req.body;
+    const { name, email, password } = req.body;
+    let updatedUser
+    let updatedProfile
     try {
         const user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
-        let profile = await query(`SELECT * FROM profiles WHERE id = $1`, [userId])
-        if (profile.rowCount === 0) {
+        console.log('User fetched successfully', user);
+        if (user.rows.length == 0) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+        const currentUser = user.rows[0]
+        if (name || email || password) {
+            updatedUser = await updateUser(userId, name, email, password, currentUser)
+        }
+        console.log(userId);
+        const profile = await query(`SELECT * FROM profiles WHERE user_id = $1`, [userId])
+        if (profile.rows.length == 0) {
             return res.status(404).json({ message: 'Profile not found' })
         }
+        updatedProfile = await updateProfile(req, profile)
+        return res.status(200).json({ message: 'Profile updated successfully', result: profile.rows[0], user: updatedUser || user.rows[0] })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error`, details: err })
+    }
+}
+
+
+export const updateUser = async (user_id: Number, name: string, email: string, password: string, userRow: any): Promise<Response | any> => {
+    try {
+        name = name || userRow.name
+        email = email || userRow.email
+        password = password || userRow.password
+        const comparePasswords = await bcrypt.compare(password, userRow.password)
+        if (comparePasswords) {
+            throw ({ message: `New password cannot be the same as the old password` })
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const result = await query('UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4', [name, email, hashedPassword, user_id]);
+        console.log('User updated successfully');
+        return result.rows[0];
+    }
+    catch (err) {
+        throw err
+    }
+}
+
+export const updateProfile = async (req: Request, profile: any): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    const { gender, age, weight, height, bio, location, birthday } = req.body;
+    const image = '/public/images/' + req.file?.filename
+    try {
         const currentProfile = profile.rows[0]
         const newGender = gender || currentProfile.gender
         const newAge = age || currentProfile.age
@@ -58,14 +110,16 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
         const newBio = bio || currentProfile.bio
         const newLocation = location || currentProfile.location
         const newBirthday = birthday || currentProfile.birthday
-        const newPicture = profile_picture || currentProfile.profile_picture
+        const newPicture = image || currentProfile.profile_picture
         profile = await query(`UPDATE profiles SET gender=$1, age=$2, weight=$3, height=$4, bio=$5, location=$6, birthday=$7, updated_at=$8, profile_picture=$10 WHERE user_id=$9 RETURNING *`,
             [newGender, newAge, newWeight, newHeight, newBio, newLocation, newBirthday, getCurrentTimestamp().toISOString(), userId, newPicture])
         console.log('Profile updated successfully');
-        return res.status(200).json({ message: 'Profile updated successfully', result: profile.rows[0], user: user.rows[0] })
+        return profile.rows[0]
     }
     catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        throw ({ err })
     }
 }
+
+
+
