@@ -54,7 +54,6 @@ export const updateUserDetails = async (req: Request, res: Response): Promise<Re
     let updatedProfile
     try {
         const user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
-        console.log('User fetched successfully', user);
         if (user.rows.length == 0) {
             return res.status(404).json({ message: 'User not found' })
         }
@@ -62,13 +61,12 @@ export const updateUserDetails = async (req: Request, res: Response): Promise<Re
         if (name || email || password) {
             updatedUser = await updateUser(userId, name, email, password, currentUser)
         }
-        console.log(userId);
         const profile = await query(`SELECT * FROM profiles WHERE user_id = $1`, [userId])
         if (profile.rows.length == 0) {
             return res.status(404).json({ message: 'Profile not found' })
         }
         updatedProfile = await updateProfile(req, profile)
-        return res.status(200).json({ message: 'Profile updated successfully', result: profile.rows[0], user: updatedUser || user.rows[0] })
+        return res.status(200).json({ message: 'Profile updated successfully', result: updatedProfile, user: updatedUser || user.rows[0] })
     }
     catch (err) {
         console.log(err)
@@ -88,7 +86,7 @@ export const updateUser = async (user_id: Number, name: string, email: string, p
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const result = await query('UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4', [name, email, hashedPassword, user_id]);
+        const result = await query('UPDATE users SET name=$1, email=$2, password=$3, updated_at=$5 WHERE id=$4', [name, email, hashedPassword, user_id, getCurrentTimestamp().toISOString()]);
         console.log('User updated successfully');
         return result.rows[0];
     }
@@ -97,7 +95,7 @@ export const updateUser = async (user_id: Number, name: string, email: string, p
     }
 }
 
-export const updateProfile = async (req: Request, profile: any): Promise<Response | any> => {
+export const updateProfile = async (req: Request, profileRows: any): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
     let { gender, age, weight, height, bio, location, birthday } = req.body;
     const image = '/public/images/' + req.file?.filename
@@ -105,7 +103,7 @@ export const updateProfile = async (req: Request, profile: any): Promise<Respons
         birthday = null;
     }
     try {
-        const currentProfile = profile.rows[0]
+        const currentProfile = profileRows.rows[0]
         const newGender = gender || currentProfile.gender
         const newAge = age || currentProfile.age
         const newWeight = weight || currentProfile.weight
@@ -114,10 +112,10 @@ export const updateProfile = async (req: Request, profile: any): Promise<Respons
         const newLocation = location || currentProfile.location
         const newBirthday = birthday || currentProfile.birthday
         const newPicture = image || currentProfile.profile_picture
-        profile = await query(`UPDATE profiles SET gender=$1, age=$2, weight=$3, height=$4, bio=$5, location=$6, birthday=$7, updated_at=$8, profile_picture=$10 WHERE user_id=$9 RETURNING *`,
+        profileRows = await query(`UPDATE profiles SET gender=$1, age=$2, weight=$3, height=$4, bio=$5, location=$6, birthday=$7, updated_at=$8, profile_picture=$10 WHERE user_id=$9 RETURNING *`,
             [newGender, newAge, newWeight, newHeight, newBio, newLocation, newBirthday, getCurrentTimestamp().toISOString(), userId, newPicture])
         console.log('Profile updated successfully');
-        return profile.rows[0]
+        return profileRows.rows[0]
     }
     catch (err) {
         throw ({ err })
