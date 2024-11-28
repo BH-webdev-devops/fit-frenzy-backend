@@ -99,8 +99,11 @@ export const updateUser = async (user_id: Number, name: string, email: string, p
 
 export const updateProfile = async (req: Request, profile: any): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { gender, age, weight, height, bio, location, birthday } = req.body;
+    let { gender, age, weight, height, bio, location, birthday } = req.body;
     const image = '/public/images/' + req.file?.filename
+    if (!birthday || isNaN(Date.parse(birthday))) {
+        birthday = null;
+    }
     try {
         const currentProfile = profile.rows[0]
         const newGender = gender || currentProfile.gender
