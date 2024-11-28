@@ -7,7 +7,7 @@ interface Profile {
     weight: number;
     height: number;
     location: string;
-    birthdate: Date;
+    birthdate: string | null;
     profile_picture: string;
 }
 export type { Profile }
