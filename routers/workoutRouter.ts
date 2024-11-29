@@ -5,7 +5,7 @@ import { authenticateJWT } from '../middlewares/jwtMiddleware';
 const workoutRouter = Router();
 workoutRouter.get('/workout', authenticateJWT, getWorkout);
 workoutRouter.post('/workout', authenticateJWT, addWorkout);
-workoutRouter.put('/workout', authenticateJWT, updateWorkout);
+workoutRouter.put('/workout/:id', authenticateJWT, updateWorkout);
 workoutRouter.get('/workout/filter', authenticateJWT, filterByDate);
 
 export default workoutRouter;
