@@ -86,8 +86,8 @@ export const updateUser = async (user_id: Number, name: string, email: string, p
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const result = await query('UPDATE users SET name=$1, email=$2, password=$3, updated_at=$5 WHERE id=$4', [name, email, hashedPassword, user_id, getCurrentTimestamp().toISOString()]);
-        console.log('User updated successfully');
+        const result = await query('UPDATE users SET name=$1, email=$2, password=$3, updated_at=$5 WHERE id=$4 RETURNING *', [name, email, hashedPassword, user_id, getCurrentTimestamp().toISOString()]);
+        console.log('User updated successfully', result);
         return result.rows[0];
     }
     catch (err) {

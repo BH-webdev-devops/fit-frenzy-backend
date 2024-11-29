@@ -124,3 +124,23 @@ export const filterByDate = async (req: Request, res: Response): Promise<Respons
     }
 }
 
+
+export const deleteWorkout = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    const { workoutId } = req.body;
+    try {
+        if (!workoutId) {
+            return res.status(400).json({ message: 'Workout ID is required' })
+        }
+        const workout = await query(`DELETE FROM workouts WHERE user_id = $1 AND id = $2 RETURNING *`, [userId, workoutId])
+        console.log('Workout deleted successfully');
+        if (workout.rowCount === 0) {
+            return res.status(404).json({ message: 'Workout not found' })
+        }
+        return res.status(200).json({ message: 'Workout deleted successfully', result: workout.rows[0] })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error` })
+    }
+}
