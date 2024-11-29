@@ -58,15 +58,16 @@ export const getWorkout = async (req: Request, res: Response): Promise<Response 
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
 
 export const updateWorkout = async (req: Request, res: Response): Promise<Response | any> => {
-    const userId = (req as Request & { user: any }).user
+    const userId = (req as Request & { user: any }).user.id
     const { duration, type, description, exercise } = req.body;
+    const { id } = req.params
     try {
-        let workout = await query(`SELECT * FROM workouts WHERE id = $1`, [userId])
+        let workout = await query(`SELECT * FROM workouts WHERE id = $1`, [id])
         if (workout.rowCount === 0) {
             return res.status(404).json({ message: 'Workout not found' })
         }
@@ -76,14 +77,14 @@ export const updateWorkout = async (req: Request, res: Response): Promise<Respon
         const newDescription = description || currentWorkout.description
         const newExercise = exercise || currentWorkout.exercise
         const newCaloriesBurnt = 200
-        workout = await query(`UPDATE workouts SET duration=$1, type=$2, description=$3, exercise=$4, updated_at=$5, calories_burnt WHERE user_id=$6 RETURNING *`,
-            [newDuration, newType, newDescription, newExercise, getCurrentTimestamp().toISOString(), newCaloriesBurnt, userId])
+        workout = await query(`UPDATE workouts SET duration=$1, type=$2, description=$3, exercise=$4, updated_at=$5, calories_burnt=$6, user_id=$7 WHERE id=$8 RETURNING *`,
+            [newDuration, newType, newDescription, newExercise, getCurrentTimestamp().toISOString(), newCaloriesBurnt, userId, id])
         console.log('Workout updated successfully');
         return res.status(200).json({ message: 'Workout updated successfully', result: workout.rows[0] })
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
 
@@ -120,7 +121,7 @@ export const filterByDate = async (req: Request, res: Response): Promise<Respons
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
 
