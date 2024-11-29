@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import fetch from "node-fetch";
 
-const YOUTUBE_API_KEY = "AIzaSyD_e3430eIWNzE_U2-q_ZrWwL4CJgBZlZ8";
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/search";
 
 export const searchGymVideos = async (req: Request, res: Response): Promise<Response | any> => {
