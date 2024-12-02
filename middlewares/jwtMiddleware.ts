@@ -21,5 +21,4 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
         console.log(err)
         return res.status(500).json({ message: `Internal server error` })
     }
-
 }
