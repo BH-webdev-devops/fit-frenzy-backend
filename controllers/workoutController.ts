@@ -1,16 +1,19 @@
 import { Request, Response } from "express";
 import { query } from "../db/db";
 import { getCurrentTimestamp } from "../utils/helpers";
+import { getCaloriesBurnt } from "../utils/helpers";
+import { getUserWeight } from "../utils/helpers";
 
 export const addWorkout = async (req: Request, res: Response): Promise<Response | any> => {
+    let calories_burnt = 0;
     const userId = (req as Request & { user: any }).user.id
     let { date, duration, type, description, exercise } = req.body;
-    const calories_burnt = 100
+    calories_burnt = await getCaloriesBurnt(exercise, await getUserWeight(userId), duration);
     date = date ? date : getCurrentTimestamp().toISOString();
     try {
         const workout = await query(
             'INSERT INTO workouts (user_id, date, duration, type, description, exercise, created_at, calories_burnt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [userId, date, duration, type, description, exercise, getCurrentTimestamp().toISOString(), calories_burnt]
+            [userId, date, duration, type, description, exercise, getCurrentTimestamp().toISOString(), Number(calories_burnt)]
         );
         console.log('Workout added successfully');
         return res.status(200).json({ message: 'Workout data', result: workout.rows[0] }
@@ -76,7 +79,7 @@ export const updateWorkout = async (req: Request, res: Response): Promise<Respon
         const newType = type || currentWorkout.type
         const newDescription = description || currentWorkout.description
         const newExercise = exercise || currentWorkout.exercise
-        const newCaloriesBurnt = 200
+        const newCaloriesBurnt = getCaloriesBurnt(newExercise, await getUserWeight(userId), newDuration);
         workout = await query(`UPDATE workouts SET duration=$1, type=$2, description=$3, exercise=$4, updated_at=$5, calories_burnt=$6, user_id=$7 WHERE id=$8 RETURNING *`,
             [newDuration, newType, newDescription, newExercise, getCurrentTimestamp().toISOString(), newCaloriesBurnt, userId, id])
         console.log('Workout updated successfully');
@@ -125,15 +128,14 @@ export const filterByDate = async (req: Request, res: Response): Promise<Respons
     }
 }
 
-
 export const deleteWorkout = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { workoutId } = req.body;
+    const workoutId = req.params.id;
     try {
         if (!workoutId) {
             return res.status(400).json({ message: 'Workout ID is required' })
         }
-        const workout = await query(`DELETE FROM workouts WHERE user_id = $1 AND id = $2 RETURNING *`, [userId, workoutId])
+        const workout = await query(`DELETE FROM workouts WHERE id = $1 RETURNING *`, [workoutId])
         console.log('Workout deleted successfully');
         if (workout.rowCount === 0) {
             return res.status(404).json({ message: 'Workout not found' })
@@ -142,6 +144,21 @@ export const deleteWorkout = async (req: Request, res: Response): Promise<Respon
     }
     catch (err) {
         console.log(err)
-        return res.status(500).json({ message: `Internal server error` })
+        return res.status(500).json({ message: `Internal server error`, details: err })
     }
 }
+
+export const fetchActivities = async (req: Request, res: Response): Promise<Response | any> => {
+    const category = req.query.category;
+    const filter = req.query.filter || '';
+    try {
+        const result = await query('SELECT activity FROM activities WHERE category = $1 AND activity ILIKE $2', [category, `%${filter}%`]);
+        if (result.rowCount === 0) {
+            return []
+        }
+        res.json(result.rows.map(i => i.activity));
+    } catch (error) {
+        console.error('Error fetching activities:', error);
+        res.status(500).json({ message: `Internal server error`, details: error });
+    }
+};
