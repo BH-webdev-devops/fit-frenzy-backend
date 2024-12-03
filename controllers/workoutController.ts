@@ -93,7 +93,7 @@ export const updateWorkout = async (req: Request, res: Response): Promise<Respon
 
 export const filterByDate = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { filterDate } = req.body;
+    const { filterDate } = req.query
     console.log(req.body, filterDate)
     try {
         if (!filterDate) {
