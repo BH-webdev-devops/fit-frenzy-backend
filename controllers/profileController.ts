@@ -63,7 +63,14 @@ export const updateUserDetails = async (req: Request, res: Response): Promise<Re
             return res.status(404).json({ message: 'User not found' })
         }
         const currentUser = user.rows[0]
-        if (name || email || password) {
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const comparePasswords = await bcrypt.compare(password, currentUser.password)
+            if (comparePasswords) {
+                throw ({ message: `New password cannot be the same as the old password` })
+            }
+        }
+        if (name != currentUser.name || email != currentUser.email || password) {
             updatedUser = await updateUser(userId, name, email, password, currentUser)
         }
         const profile = await query(`SELECT * FROM profiles WHERE user_id = $1`, [userId])

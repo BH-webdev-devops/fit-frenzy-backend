@@ -18,7 +18,7 @@ export const getCaloriesBurnt = async (exercise: string, weightInKg: number, dur
     caloriesBurnt = Number(MET) * Number(weightInKg) * duration / 60;
     console.log(caloriesBurnt.toFixed(2))
 
-    return caloriesBurnt;
+    return Number(caloriesBurnt.toFixed(2));
 }
 
 export const getUserWeight = async (userId: any): Promise<any> => {
@@ -52,3 +52,11 @@ export const getWeightEntries = async (req: Request, res: Response): Promise<any
         return res.status(500).json({ message: `Internal server error` })
     }
 }
+
+export const paginationResult = (result: any, page: number, limit: number) => {
+    const { rows, rowCount } = result;
+    const totalPages = Math.ceil(rowCount / limit);
+    const pagination = { totalItems: rows[0].count, currentPage: page, totalPages: totalPages, itemsPerPage: limit };
+    return pagination
+}
+
