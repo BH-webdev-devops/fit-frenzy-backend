@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { query } from "../db/db";
-import { getCurrentTimestamp } from "../utils/helpers";
+import { getCurrentTimestamp, paginationResult } from "../utils/helpers";
 import { getCaloriesBurnt } from "../utils/helpers";
 import { getUserWeight } from "../utils/helpers";
 
@@ -46,17 +46,11 @@ export const getWorkout = async (req: Request, res: Response): Promise<Response 
             return res.status(404).json({ message: 'No workouts found' });
         }
 
-        const totalPages = Math.ceil(parseInt(totalWorkouts.rows[0].count) / limit);
-
+        const pagination = paginationResult(totalWorkouts, page, limit);
         return res.status(200).json({
             message: 'Workouts data',
             result: workouts.rows,
-            pagination: {
-                totalItems: parseInt(totalWorkouts.rows[0].count),
-                totalPages: totalPages,
-                currentPage: page,
-                itemsPerPage: limit
-            }
+            pagination: pagination
         });
     }
     catch (err) {
@@ -67,7 +61,7 @@ export const getWorkout = async (req: Request, res: Response): Promise<Response 
 
 export const updateWorkout = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { duration, type, description, exercise } = req.body;
+    const { duration, type, description, exercise, date } = req.body;
     const { id } = req.params
     try {
         let workout = await query(`SELECT * FROM workouts WHERE id = $1`, [id])
@@ -77,11 +71,13 @@ export const updateWorkout = async (req: Request, res: Response): Promise<Respon
         const currentWorkout = workout.rows[0]
         const newDuration = duration || currentWorkout.duration
         const newType = type || currentWorkout.type
+        const newDate = date || currentWorkout.date
         const newDescription = description || currentWorkout.description
         const newExercise = exercise || currentWorkout.exercise
-        const newCaloriesBurnt = getCaloriesBurnt(newExercise, await getUserWeight(userId), newDuration);
-        workout = await query(`UPDATE workouts SET duration=$1, type=$2, description=$3, exercise=$4, updated_at=$5, calories_burnt=$6, user_id=$7 WHERE id=$8 RETURNING *`,
-            [newDuration, newType, newDescription, newExercise, getCurrentTimestamp().toISOString(), newCaloriesBurnt, userId, id])
+        const newCaloriesBurnt = await getCaloriesBurnt(newExercise, await getUserWeight(userId), newDuration);
+        console.log('new cal', newCaloriesBurnt, typeof newCaloriesBurnt)
+        workout = await query(`UPDATE workouts SET duration=$1, type=$2, description=$3, exercise=$4, updated_at=$5, calories_burnt=$6, user_id=$7, date=$9 WHERE id=$8 RETURNING *`,
+            [newDuration, newType, newDescription, newExercise, getCurrentTimestamp().toISOString(), newCaloriesBurnt, userId, id, newDate])
         console.log('Workout updated successfully');
         return res.status(200).json({ message: 'Workout updated successfully', result: workout.rows[0] })
     }
@@ -92,41 +88,65 @@ export const updateWorkout = async (req: Request, res: Response): Promise<Respon
 }
 
 export const filterByDate = async (req: Request, res: Response): Promise<Response | any> => {
-    const userId = (req as Request & { user: any }).user.id
-    const { filterDate } = req.query
-    console.log(req.body, filterDate)
+    const userId = (req as Request & { user: any }).user.id;
+    const { filterDate, startDate, endDate } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+    console.log(req.body, filterDate, startDate, endDate);
+
     try {
-        if (!filterDate) {
-            return res.status(400).json({ message: 'Date is required' })
-        }
         let limit_date;
-        if (filterDate === "one_week") {
-            limit_date = new Date(getCurrentTimestamp().getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        } else if (filterDate === "one_month") {
-            limit_date = new Date(getCurrentTimestamp().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        } else if (filterDate === "three_months") {
-            limit_date = new Date(getCurrentTimestamp().getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
-        } else if (filterDate === "six_months") {
-            limit_date = new Date(getCurrentTimestamp().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString();
-        } else if (filterDate === "one_year") {
-            limit_date = new Date(getCurrentTimestamp().getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+        if (filterDate !== "custom") {
+            if (filterDate === "one_week") {
+                limit_date = new Date(getCurrentTimestamp().getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (filterDate === "one_month") {
+                limit_date = new Date(getCurrentTimestamp().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (filterDate === "three_months") {
+                limit_date = new Date(getCurrentTimestamp().getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (filterDate === "six_months") {
+                limit_date = new Date(getCurrentTimestamp().getTime() - 180 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (filterDate === "one_year") {
+                limit_date = new Date(getCurrentTimestamp().getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+            } else {
+                return res.status(400).json({ message: 'Invalid filter date' });
+            }
+            console.log(limit_date);
+            const workout = await query(`SELECT * FROM workouts WHERE user_id = $1 AND date > $2`, [userId, limit_date]);
+            console.log('Workout fetched successfully');
+            if (workout.rowCount === 0) {
+                return res.status(404).json({ message: 'Workout not found', details: workout.rows });
+            }
+            const totalWorkouts = await query(`SELECT COUNT(*) FROM workouts WHERE user_id = $1 AND date > $2`, [userId, limit_date]);
+
+            return res.status(200).json({
+                message: 'Workouts data',
+                result: workout.rows,
+                pagination: paginationResult(totalWorkouts, page, limit)
+            });
+        } else if (startDate && endDate) {
+            const start = new Date(startDate as string).toISOString();
+            const end = new Date(endDate as string).toISOString();
+            const workouts = await query(`SELECT * FROM workouts WHERE user_id = $1 AND date BETWEEN $2 AND $3 LIMIT $4 OFFSET $5`, [userId, start, end, limit, offset]);
+            console.log('Workout fetched successfully');
+            if (workouts.rowCount === 0) {
+                return res.status(404).json({ message: 'Workout not found', details: workouts.rows });
+            }
+            const totalWorkouts = await query(`SELECT COUNT(*) FROM workouts WHERE user_id = $1 AND date BETWEEN $2 AND $3`, [userId, start, end]);
+
+            return res.status(200).json({
+                message: 'Workouts data',
+                result: workouts.rows,
+                pagination: paginationResult(totalWorkouts, page, limit)
+            });
         } else {
-            return res.status(400).json({ message: 'Invalid filter date' });
+            return res.status(400).json({ message: 'Date is required' });
         }
-        console.log(limit_date)
-        const workout = await query(`SELECT * FROM workouts WHERE user_id = $1 AND date > $2`, [userId, limit_date])
-        console.log('Workout fetched successfully');
-        if (workout.rowCount === 0) {
-            return res.status(404).json({ message: 'Workout not found', result: workout.rows })
-        }
-        return res.status(200).json({ message: 'Workout data', result: workout.rows }
-        )
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: 'Internal server error', details: err });
     }
-    catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: `Internal server error`, details: err })
-    }
-}
+};
 
 export const deleteWorkout = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
@@ -162,3 +182,19 @@ export const fetchActivities = async (req: Request, res: Response): Promise<Resp
         res.status(500).json({ message: `Internal server error`, details: error });
     }
 };
+
+export const fetchAllWorkouts = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    try {
+        const workouts = await query(`SELECT * FROM workouts WHERE user_id = $1`, [userId])
+        console.log('Workouts fetched successfully');
+        if (workouts.rowCount === 0) {
+            return res.status(404).json({ message: 'No workouts found' });
+        }
+        return res.status(200).json({ message: 'Workouts data', result: workouts.rows });
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error`, details: err })
+    }
+}

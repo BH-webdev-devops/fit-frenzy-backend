@@ -53,10 +53,10 @@ export const getWeightEntries = async (req: Request, res: Response): Promise<any
     }
 }
 
-export const paginationResult = (result: any, page: number, limit: number) => {
-    const { rows, rowCount } = result;
-    const totalPages = Math.ceil(rowCount / limit);
-    const pagination = { totalItems: rows[0].count, currentPage: page, totalPages: totalPages, itemsPerPage: limit };
+export const paginationResult = (totalWorkouts: any, page: number, limit: number) => {
+    const totalItems = parseInt(totalWorkouts.rows[0].count);
+    const totalPages = Math.ceil(totalWorkouts.rows[0].count / limit);
+    const pagination = { totalItems: totalItems, currentPage: page, totalPages: totalPages, itemsPerPage: limit };
     return pagination
 }
 
