@@ -7,7 +7,7 @@ import profileRouter from "./routers/profileRouter";
 import workRouter from "./routers/workoutRouter";
 import quoteRouter from "./routers/quoteRouter";
 
-let port = process.env.PORT || 3007;
+let port = process.env.PORT || 8080;
 
 const app: Application = express();
 app.use(cors());

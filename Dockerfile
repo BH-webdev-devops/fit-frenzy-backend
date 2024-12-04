@@ -38,7 +38,7 @@ RUN npm rebuild bcrypt --build-from-source
 # Build TypeScript code
 RUN npm run build
 
-EXPOSE ${PORT}
+EXPOSE 8080
 
 # Start the application
 CMD ["npm", "start"]
