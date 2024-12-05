@@ -11,7 +11,45 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+## Tech Stack
+
+- Framework: Node.js with Express
+- Database: Postgres
+- Containerization: Docker
+- Deployment: Google Cloud Run
+- Authentication: JSON Web Tokens (JWT)
+- Environment Variables Management: dotenv
+- 
+
+## Key features
+
+- User authentication
+  - **Sign Up**: Allows users to create a new account by providing necessary details such as username, email and password.
+  - **Login**: Enables users to access their account by entering their credentials (email and password)
+  - **Forgot Password**: Provides a way for users to reset their password if they have forgotten it, typically through email and birthdate verification.
+
+- Profile management
+  - Users can add and manage their profile details, such as name, email, profile picture, age, gender, weight, height.
+
+- Workout logging
+  - **Add, Edit, Remove workout details**: Users can keep track of their workouts by logging details such as exercise type, exercise name, duration, date. They can also modify or delete existing workout entries.
+  Based on provided information, burnt calories are calculated in the backend.
+  reference: https://www.nutristrategy.com/caloriesburned.htm
+
+- Filter Workouts
+  - Users can filter workouts based on various Date Ranges: Users can filter their workout logs to view entries within specific date ranges.
+  - Custom date filters: Users can apply custom date filters to view workouts within a user-defined date range.
+
+- Pagination
+    - The workout data is divided into smaller, manageable pages. Users can request specific pages of data, reducing the load time and improving performance with limit set to 9 by default.
+
+
 ## Installation
+
+Pre-requisites:
+- Node.js (>= 16.x)
+- Postgres SQL
+- GCP with necessary permissions
 
 Clone the repository:
 
@@ -103,28 +141,3 @@ To deploy the application, push changes to the main branch or manually trigger t
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
-
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Tech Stack
-
-- Framework: Node.js with Express
-- Database: Supabase (Postgres)
-- Containerization: Docker
-- Deployment: Google Cloud Run
-- Authentication: JSON Web Tokens (JWT)
-- File Uploads: Multer
-- Environment Variables Management: dotenv
-
-## Key features
-
-- User authentication
-    - Sign Up: Allows users to create a new account.
-    - Login: Enables users to access their account.
-        - forgot password: Provides a way to reset the password if forgotten.
-- Profile management
-    - Users can add or update their personal information.
-- Workout logging
-    - Users can log, modify, view and remove their workouts.
-    - Users can filter workouts based on various Date Ranges
