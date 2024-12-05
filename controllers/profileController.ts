@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { query } from "../db/db";
-import { getCurrentTimestamp, addWeightEntry } from "../utils/helpers";
+import { getCurrentTimestamp, addWeightEntry, formatDate } from "../utils/helpers";
 import bcrypt from 'bcryptjs';
+
 
 
 export const addProfile = async (req: Request, res: Response): Promise<Response | any> => {
@@ -12,6 +13,8 @@ export const addProfile = async (req: Request, res: Response): Promise<Response 
     // Check if birthday is a valid date, otherwise set it to null
     if (!birthday || isNaN(Date.parse(birthday))) {
         birthday = null;
+    } else {
+        birthday = formatDate(birthday)
     }
     console.log('birthday', birthday)
     try {
@@ -114,6 +117,8 @@ export const updateProfile = async (req: Request, profileRows: any): Promise<Res
     const date = getCurrentTimestamp().toISOString()
     if (!birthday || isNaN(Date.parse(birthday))) {
         birthday = null;
+    } else {
+        birthday = formatDate(birthday)
     }
     try {
         const currentProfile = profileRows.rows[0]
