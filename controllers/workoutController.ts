@@ -42,9 +42,9 @@ export const getWorkout = async (req: Request, res: Response): Promise<Response 
         );
 
         console.log('Workouts fetched successfully');
-        if (workouts.rowCount === 0) {
-            return res.status(404).json({ message: 'No workouts found' });
-        }
+        // if (workouts.rowCount === 0) {
+        //     return res.status(404).json({ message: 'No workouts found' });
+        // }
 
         const pagination = paginationResult(totalWorkouts, page, limit);
         return res.status(200).json({
@@ -114,9 +114,9 @@ export const filterByDate = async (req: Request, res: Response): Promise<Respons
             console.log(limit_date);
             const workout = await query(`SELECT * FROM workouts WHERE user_id = $1 AND date > $2`, [userId, limit_date]);
             console.log('Workout fetched successfully');
-            if (workout.rowCount === 0) {
-                return res.status(404).json({ message: 'Workout not found', details: workout.rows });
-            }
+            // if (workout.rowCount === 0) {
+            //     return res.status(404).json({ message: 'Workout not found', details: workout.rows });
+            // }
             const totalWorkouts = await query(`SELECT COUNT(*) FROM workouts WHERE user_id = $1 AND date > $2`, [userId, limit_date]);
 
             return res.status(200).json({
@@ -129,9 +129,9 @@ export const filterByDate = async (req: Request, res: Response): Promise<Respons
             const end = new Date(endDate as string).toISOString();
             const workouts = await query(`SELECT * FROM workouts WHERE user_id = $1 AND date BETWEEN $2 AND $3 LIMIT $4 OFFSET $5`, [userId, start, end, limit, offset]);
             console.log('Workout fetched successfully');
-            if (workouts.rowCount === 0) {
-                return res.status(404).json({ message: 'Workout not found', details: workouts.rows });
-            }
+            // if (workouts.rowCount === 0) {
+            //     return res.status(404).json({ message: 'Workout not found', details: workouts.rows });
+            // }
             const totalWorkouts = await query(`SELECT COUNT(*) FROM workouts WHERE user_id = $1 AND date BETWEEN $2 AND $3`, [userId, start, end]);
 
             return res.status(200).json({
