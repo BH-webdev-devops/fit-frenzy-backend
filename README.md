@@ -141,3 +141,4 @@ To deploy the application, push changes to the main branch or manually trigger t
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
+

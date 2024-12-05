@@ -31,9 +31,8 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
         if (!isMatch) {
             return res.status(400).json({ message: `Invalid credentials` })
         }
-        const token = jwt.sign({ id: user.id }, String(process.env.JWT_SECRET), { expiresIn: '2h' })
-        console.log(token)
-        return res.status(200).json({ message: 'Login successful', token: 'Bearer ' + token, user: { id: user.id, name: user.name, email: user.email } })
+        const token = jwt.sign({ id: user.id }, String(process.env.JWT_SECRET), { expiresIn: '6h' })
+        return res.status(200).json({ message: 'Login successful', token: 'Bearer ' + token, user: { id: user.id, name: user.name, email: user.email, admin: user.admin } })
     }
     catch (err) {
         console.log(err)
