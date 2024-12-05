@@ -40,9 +40,9 @@ export const getProfile = async (req: Request, res: Response): Promise<Response 
         const user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
         const profile = await query(`SELECT * FROM profiles WHERE user_id = $1`, [userId])
         console.log('Profile fetched successfully');
-        if (profile.rowCount === 0) {
-            return res.status(404).json({ message: 'Profile not found' })
-        }
+        // if (profile.rowCount === 0) {
+        //     return res.status(404).json({ message: 'Profile not found' })
+        // }
         return res.status(200).json({ message: 'Profile data', result: profile.rows[0], user: user.rows[0] }
         )
     }
