@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import { User } from '../types/User';
-import { getCurrentTimestamp } from '../utils/helpers';
+import { getCurrentTimestamp, formatDate } from '../utils/helpers';
 
 
 export const registerUser = async (req: Request, res: Response): Promise<Response | any> => {
@@ -38,5 +38,32 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
     catch (err) {
         console.log(err)
         return res.status(500).json({ message: `Internal server error` })
+    }
+}
+
+export const forgotPassword = async (req: Request, res: Response): Promise<Response | any> => {
+    const { email, birthdate, newPassword } = req.body;
+    console.log(req.body)
+    try {
+        if (!email || !birthdate || !newPassword) {
+            return res.status(400).json({ message: 'Please provide all required fields' });
+        }
+
+        let user = await query('SELECT * FROM users WHERE email = $1 ', [email]);
+        if (user.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const userId = user.rows[0].id;
+        const profileResult = await query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+        if (profileResult.rows.length !== 0 && profileResult.rows[0].birthday && formatDate(profileResult.rows[0].birthday) !== (birthdate)) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        await query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+        return res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: `Internal server error` });
     }
 }
