@@ -188,9 +188,9 @@ export const fetchAllWorkouts = async (req: Request, res: Response): Promise<Res
     try {
         const workouts = await query(`SELECT * FROM workouts WHERE user_id = $1`, [userId])
         console.log('Workouts fetched successfully');
-        if (workouts.rowCount === 0) {
-            return res.status(404).json({ message: 'No workouts found' });
-        }
+        // if (workouts.rowCount === 0) {
+        //     return res.status(404).json({ message: 'No workouts found' });
+        // }
         return res.status(200).json({ message: 'Workouts data', result: workouts.rows });
     }
     catch (err) {
