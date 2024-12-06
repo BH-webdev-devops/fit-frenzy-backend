@@ -7,6 +7,7 @@ import profileRouter from "./routers/profileRouter";
 import workRouter from "./routers/workoutRouter";
 import quoteRouter from "./routers/quoteRouter";
 import adminRouter from "./routers/adminRouter";
+import postRouter from "./routers/postRouter";
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
 
@@ -47,6 +48,7 @@ app.use("/api", profileRouter);
 app.use("/api", workRouter);
 app.use("/api", quoteRouter);
 app.use("/api", adminRouter);
+app.use("/api", postRouter);
 
 const startServer = async () => {
   try {

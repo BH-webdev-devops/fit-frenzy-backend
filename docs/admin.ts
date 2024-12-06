@@ -135,7 +135,6 @@
  *                 error:
  *                   type: string
  *                   example: Error getting user by ID
- * /admin/users/{id}:
  *   delete:
  *     summary: Delete a user by ID
  *     security:

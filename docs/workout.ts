@@ -27,6 +27,7 @@
  * /api/workout:
  *   get:
  *     summary: Get all workouts
+ *     tags: [Workouts]
  *     responses:
  *       200:
  *         description: List of workouts with pagination
@@ -69,6 +70,7 @@
  *                   example: Internal server error
  *   post:
  *     summary: Add a new workout
+ *     tags: [Workouts]
  *     requestBody:
  *       required: true
  *       content:
@@ -100,6 +102,7 @@
  *                   example: Internal server error
  *   put:
  *     summary: Update a workout by ID
+ *     tags: [Workouts]
  *     parameters:
  *       - in: path
  *         name: id
@@ -148,6 +151,7 @@
  *                   example: Internal server error
  *   delete:
  *     summary: Delete a workout by ID
+ *     tags: [Workouts]
  *     parameters:
  *       - in: path
  *         name: id
