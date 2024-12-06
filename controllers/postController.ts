@@ -33,7 +33,7 @@ export const getPosts = async (req: Request, res: Response): Promise<Response | 
     const offset = (page - 1) * limit;
     try {
         const posts = await query(
-            `SELECT * FROM posts LIMIT $1 OFFSET $2 ORDER BY created_at DESC`,
+            `SELECT * FROM posts LIMIT $1 OFFSET $2`,
             [limit, offset]
         );
         const totalPosts = await query(
