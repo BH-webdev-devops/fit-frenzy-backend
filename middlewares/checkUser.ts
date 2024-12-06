@@ -10,6 +10,8 @@ export const checkUserData = (checkForAllFields: boolean) => {
             if (checkForAllFields) {
                 if (!name || !email || !password) {
                     return res.status(403).json({ message: `All fields are required` })
+                } else if (await validatePassword(password)) {
+                    return res.status(400).json({ message: `Password must be at least 8 characters long and not includes $` })
                 }
                 else {
                     console.log('inside checkUserData worked')
@@ -65,4 +67,13 @@ export const checkIfUserExist = (checkForExistence: boolean) => {
             return res.status(500).json({ message: `Internal server error` })
         }
     }
+}
+
+const validatePassword = async (password: string) => {
+    if (password.length < 8) {
+        return false
+    } else if (!password.includes('$')) {
+        return false
+    }
+    return true
 }
