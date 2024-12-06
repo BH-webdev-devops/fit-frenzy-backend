@@ -20,6 +20,7 @@
  * /admin/check:
  *   get:
  *     summary: Check if the user is an admin
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -66,6 +67,7 @@
  * /admin/users:
  *   get:
  *     summary: Get all users
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -96,6 +98,7 @@
  * /admin/users/{id}:
  *   get:
  *     summary: Get an user by ID
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -137,6 +140,7 @@
  *                   example: Error getting user by ID
  *   delete:
  *     summary: Delete a user by ID
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     responses:

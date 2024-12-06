@@ -1,6 +1,6 @@
 # FitFrenzy Backend
 
-**FitFrenzy is a backend application designed to manage user authentication, profiles, quotes, and workouts. This application is built with TypeScript and Node.js, and it uses Docker for containerization and Google Cloud Run for deployment.**
+**FitFrenzy, a fitness track application, is a backend application designed to manage user authentication, profiles,  workouts delivers quotes to motivate. This application is built with TypeScript and Node.js and it uses Docker for containerization and Google Cloud Run for deployment.**
 
 ## Table of Contents
 - [Installation](#installation)
@@ -13,13 +13,18 @@
 
 ## Tech Stack
 
-- Framework: Node.js with Express
-- Database: Postgres
-- Containerization: Docker
-- Deployment: Google Cloud Run
-- Authentication: JSON Web Tokens (JWT)
-- Environment Variables Management: dotenv
-- 
+- **Express.js**: Nodejs with express framework for building APIs
+- **Postgres**: Relational database for storing and managing user and workout data
+- **Docker**: Containerization to deploy the application on GCP
+- **Google Cloud Platform**: For deployment
+- **Swagger**: API documentation 
+
+### Tools and Libraries
+- **jsonwebtoken**: Authentication using JSON Web Tokens (JWT)
+- **dotenv**: Environment Variables Management
+- **bcryptjs**: Secure password hashing
+- **cors**: secure cross-origin resource sharing
+
 
 ## Key features
 
@@ -42,6 +47,14 @@
 
 - Pagination
     - The workout data is divided into smaller, manageable pages. Users can request specific pages of data, reducing the load time and improving performance with limit set to 9 by default.
+
+- Admin role
+    - **View, Delete users**: Only users with admin role has access to view all the users and their profile. If required, user can all delete the user profile.
+
+- Community Blog
+    - In order to connect all the users together, a user can post a message and other users can reply to it.
+    All posts are visible to all the users.
+    - User can delete or update only their posts and replies.
 
 
 ## Installation
@@ -77,6 +90,14 @@ To build the project, run:
 To start the production server, run:
 
 `npm start`
+
+If you are running it on local, access the application at:
+
+`http://localhost:<port>`
+
+You can test and use APIs using swagger at
+
+`http://localhost:<port>/api-docs/#/`
 
 ## Project Structure
 
@@ -126,19 +147,32 @@ utils/
 The following environment variables need to be set in the .env file:
 
 - `PORT`
+    Port for the backend application to run (e.g., 3000)
 - `DB_HOST`
+    Hostname or IP address of the database (e.g., localhost or 127.0.0.1)
+-  `DB_TYPE`
+    Type of database in use (e.g., postgres)
 - `DB_NAME`
+    Database name to connect to (e.g., fit-frenzy)
 - `DB_USER`
+    Username used to authenticate to database (e.g., root)
 - `DB_PASSWORD`
+    Password used to authenticate the user to database (e.g., my_password)
 - `DB_PORT`
+    Port of the database (e.g., 6543)
+- `JWT_SECRET`
+    Secret key for signing JSON Web Token to authenticate user (e.g., abcdefghijklmnop123)
 - `GCP_SA_KEY`
+    Service account key for Google Cloud Platform (e.g., `{"type": "service_account", "project_id": "my-project-id", ...}`)
 - `GCP_PROJECT_ID`
+    Google Cloud Platform project ID (e.g., `my-gcp-project`)
+- `GCP_REGION`
+    Google Cloud Platform region where your service should be hosted (e.g., `us-central1`)
 
 ## Deployment
 The application is deployed using GitHub Actions and Google Cloud Run. The deployment workflow is defined in deployBackend.yaml.
 
 To deploy the application, push changes to the main branch or manually trigger the workflow using the GitHub Actions interface.
 
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any changes.
+Currently it is deployed in https://fit-frenzy-backend-630243095989.europe-west1.run.app
 
