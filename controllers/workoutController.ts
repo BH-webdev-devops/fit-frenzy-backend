@@ -33,7 +33,7 @@ export const getWorkout = async (req: Request, res: Response): Promise<Response 
     const offset = (page - 1) * limit;
     try {
         const workouts = await query(
-            `SELECT * FROM workouts WHERE user_id = $1 LIMIT $2 OFFSET $3`,
+            `SELECT * FROM workouts WHERE user_id = $1 LIMIT $2 OFFSET $3 ORDER BY date DESC`,
             [userId, limit, offset]
         );
         const totalWorkouts = await query(
