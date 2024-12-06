@@ -48,6 +48,7 @@
  * /api/profile:
  *   get:
  *     summary: Get user profile
+ *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -77,6 +78,7 @@
  *                   example: Internal server error
  *   post:
  *     summary: Add a new profile
+ *     tags: [Profile]
  *     requestBody:
  *       required: true
  *       content:
@@ -110,6 +112,7 @@
  *                   example: Internal server error
  *   put:
  *     summary: Update user profile
+ *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

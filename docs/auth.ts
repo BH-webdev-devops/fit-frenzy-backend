@@ -13,6 +13,7 @@
  * /api/register:
  *   post:
  *     summary: Register a new user (Sign Up)
+ *     tags: [Register]
  *     description: Registers a new user with name, email and password
  *     requestBody:
  *       required: true
@@ -80,6 +81,7 @@
  * /api/login:
  *   post:
  *     summary: Log in a user
+ *     tags: [Login]
  *     description: Authenticates a user using their email and password and returns a JWT token.
  *     requestBody:
  *       required: true
@@ -158,6 +160,7 @@
  * /api/forgot-password:
  *   post:
  *     summary: Reset the password of a user
+ *     tags: [Forgot Password]
  *     description: Resets the password of a user using their email, birthdate and new password
  *     requestBody:
  *       required: true
