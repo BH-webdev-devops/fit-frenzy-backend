@@ -57,7 +57,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
         }
         const userId = user.rows[0].id;
         const profileResult = await query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
-        if (profileResult.rows.length !== 0 && profileResult.rows[0].birthday && formatDate(profileResult.rows[0].birthday) !== (birthdate)) {
+        if (profileResult?.rows?.length == 0 || (profileResult.rows[0].birthday != null && formatDate(profileResult.rows[0].birthday) !== (birthdate))) {
             return res.status(404).json({ message: 'User not found' });
         }
         const salt = await bcrypt.genSalt(10);
