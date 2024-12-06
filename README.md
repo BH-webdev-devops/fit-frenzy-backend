@@ -1,6 +1,6 @@
 # FitFrenzy Backend
 
-**FitFrenzy, a fitness track application, is a backend application designed to manage user authentication, profiles,  workouts delivers quotes to motivate. This application is built with TypeScript and Node.js and it uses Docker for containerization and Google Cloud Run for deployment.**
+**FitFrenzy, a fitness track application, is a backend application designed to manage user authentication, profiles,  workouts, motivational quotes. This application is built with TypeScript and Node.js and it uses Docker for containerization and Google Cloud Run for deployment.**
 
 ## Table of Contents
 - [Installation](#installation)
@@ -62,7 +62,9 @@
 Pre-requisites:
 - Node.js (>= 16.x)
 - Postgres SQL
-- GCP with necessary permissions
+  deployment on Cloud (optional)
+    - GCP with necessary permissions
+    - Docker
 
 Clone the repository:
 
