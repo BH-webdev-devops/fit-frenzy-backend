@@ -47,6 +47,9 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
         if (!email || !birthdate || !newPassword) {
             return res.status(400).json({ message: 'Please provide all required fields' });
         }
+        if (await validatePassword(newPassword)) {
+            return res.status(403).json({ message: 'Password must be at least 8 characters long and include $' });
+        }
 
         let user = await query('SELECT * FROM users WHERE email = $1 ', [email]);
         if (user.rows.length === 0) {
@@ -65,4 +68,13 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
         console.log(err);
         return res.status(500).json({ message: `Internal server error` });
     }
+}
+
+const validatePassword = async (password: string) => {
+    if (password.length < 8) {
+        return false
+    } else if (!password.includes('$')) {
+        return false
+    }
+    return true
 }
