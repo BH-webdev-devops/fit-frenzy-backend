@@ -4,12 +4,18 @@ import { getCurrentTimestamp, paginationResult, formatDate } from "../utils/help
 
 export const addPost = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const userName = (req as Request & { user: any }).user.name
     let { title, content, image } = req.body;
+    let userName = ''
     const date = formatDate(getCurrentTimestamp().toISOString())
+    let user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
+    if (user.rowCount === 0) {
+        userName = 'Anonymous'
+    } else {
+        userName = user.rows[0].name
+    }
     try {
         const post = await query(`INSERT INTO posts (user_id, title, content, image, created_at, user_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [userId, title, content, image, date]);
+            [userId, title, content, image, date, userName]);
         console.log('Post added successfully');
         return res.status(200).json({ message: 'Post data', result: post.rows[0] }
         )
@@ -97,11 +103,18 @@ export const updatePost = async (req: Request, res: Response): Promise<Response 
 
 export const addReply = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const userName = (req as Request & { user: any }).user.name
+    let userName = ''
     const postId = req.params.id;
     let { comment } = req.body;
     const date = formatDate(getCurrentTimestamp().toISOString())
     console.log("date", date, comment, postId, userId)
+    let user = await query(`SELECT * FROM users WHERE id = $1`, [userId])
+    if (user.rowCount === 0) {
+        userName = 'Anonymous'
+    } else {
+        userName = user.rows[0].name
+    }
+
     try {
         const post = await query(`INSERT INTO replies (user_id, post_id, comment, created_at, user_name) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
             [userId, postId, comment, date, userName]);
